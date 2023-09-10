@@ -1,0 +1,92 @@
+https://www.ti.com/lit/an/slaa329a/slaa329a.pdf
+https://www.ti.com/en/download/mcu/Digital-filtering-methodoliges-for-MSP430-systems.pdf
+https://www.allaboutcircuits.com/technical-articles/an-introduction-to-canonical-signed-digit-representation/
+
+
+bring into form:
+
+x * m
+
+where m < 1
+
+x / 45
+x * (1/45)
+x * 0.02222222222
+
+convert mantissa of m to 0b
+speedcrunch
+	0,02222 =
+	F6
+	0,000001011011
+	truncate at desired bit-depth
+		12 bit
+		16 bit
+		less bits = less steps for horners method!
+
+
+
+horners method
+
+count distances between 1s of 0b-formatted m, right-most to left-most
+	= dn (0...)
+count distance to decimal point
+	= dpoint
+next one = 1
+
+xtemp = x >> d0 + x
+xtemp = xtemp >> d1 + x
+...
+result = xtemp >> dpoint
+
+
+
+canonical signed digit representation
+
+first: convert mantissa of m to 0b
+
+convert to CSDr
+right-to-left
+
+single 1 = 1
+group consecutive 1s
+	right-most 1 becomes (-1)
+	all other 1s become 0
+	left-most 1 is pre-pended by 1
+		0b0.00011111 1001 (space added for alignment)
+		0b0.00100000-1001
+	iterative
+		only one grouping at a time
+		still right to left
+		0b011 011 1001
+		0b011 100-1001
+		b0100-100-1001
+
+now apply horners method
+	if next 1 is (-1) "+ x" becomes "- x"
+
+
+
+
+
+x = 512
+
+binary *< 1
+x / 4.44
+= x * (1/ 4.44)
+= x * 0.224224
+= x * 0b0.0011100110101000
+
+CSD
+ 0 0 1 1 1 0 0 1 1 0 1 0 1 0 0 0
+ 0 0 1 1 1 0 1 0-1 0 1 0 1 0 0 0
+ 0 1 0 0-1 0 1 0-1 0 1 0 1 0 0 0
+distances
+  2     3   2   2   2   2       
+
+horner
+xtemp = x >> 2 + x
+xtemp = xtemp >> 2 - x
+xtemp = xtemp >> 2 + x
+xtemp = xtemp >> 2 - x
+xtemp = xtemp >> 3 + x
+result = xtemp >> 2
